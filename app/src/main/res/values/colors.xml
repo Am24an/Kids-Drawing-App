@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="HotPink">#FF69B4</color>
+    <color name="Yellow">#FFFF00</color>
+    <color name="Orange">#FFA500</color>
+    <color name="Blue">#0000FF</color>
+    <color name="OrangeRed">#FF4500</color>
+    <color name="Magenta">#FF00FF</color>
+    <color name="Red">#FF0000</color>
+    <color name="Wheat">#F5DEB3</color>
+    <color name="SaddleBrown">#8B4513</color>
+    <color name="BlueViolet">#8A2BE2</color>
+    <color name="Maroon">#800000</color>
+    <color name="RoyalBlue">#4169E1</color>
+    <color name="LimeGreen">#32CD32</color>
+    <color name="Aqua">#00FFFF</color>
+    <color name="SpringGreen">#00FF7F</color>
+    <color name="DeepSkyBlue">#00BFFF</color>
+
+
+</resources>
