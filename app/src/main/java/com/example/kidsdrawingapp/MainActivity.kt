@@ -62,8 +62,8 @@ class MainActivity : AppCompatActivity() {
                         "Permission Granted", Toast.LENGTH_LONG).show()
 
                     val pickIntent = Intent(Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI)
-                        openGalleryLauncher.launch(pickIntent)
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    openGalleryLauncher.launch(pickIntent)
                 }else{
                     if(permissionName==Manifest.permission.READ_EXTERNAL_STORAGE){
                         Toast.makeText(this@MainActivity,
@@ -219,7 +219,8 @@ class MainActivity : AppCompatActivity() {
 //                    val f = File(externalCacheDir?.absoluteFile.toString()
 //                    + File.separator + "KidsDrawingApp" + System.currentTimeMillis() / 1000 + ".png")
 
-                    //This is new updated code for saving the file and viewing it.
+                    /*This is new updated code for saving the file and viewing it.*/
+
                     val f = File(getExternalFilesDir(null)?.absolutePath.toString()
                     + File.separator + "KidsDrawingApp" + System.currentTimeMillis() / 1000 + ".png")
 
@@ -235,6 +236,7 @@ class MainActivity : AppCompatActivity() {
                             Toast.makeText(this@MainActivity, "Files saved successfully: $result",
                                 Toast.LENGTH_SHORT).show()
                             shareImage(result)
+                            notifyGallery(result) // Notify the media scanner.
                         }else{
                             Toast.makeText(this@MainActivity, "Something went wrong while saving the file.",
                                 Toast.LENGTH_SHORT).show()
@@ -252,6 +254,19 @@ class MainActivity : AppCompatActivity() {
 
         return result
     }
+
+    private fun notifyGallery(filePath: String) {
+        MediaScannerConnection.scanFile(
+            this, arrayOf(filePath),null,){
+            path, uri ->
+            runOnUiThread{
+
+                Toast.makeText(this,"File is now visible in the gallery.",
+                    Toast.LENGTH_SHORT).show()
+            }
+        }
+    }
+
     /**
      * Method is used to show Custom Progress Dialog.
      */
@@ -276,17 +291,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun shareImage(result: String){
-        MediaScannerConnection.scanFile(this, arrayOf(result),null){
-            path, uri->
-            val shareIntent = Intent()
-            shareIntent.action = Intent.ACTION_SEND
-            shareIntent.putExtra(Intent.EXTRA_STREAM, uri)
-            shareIntent.type = "image/png"
+        val file = File(result)
+        val uri = FileProvider.getUriForFile(this,
+            "com.example.kidsdrawingapp.fileprovider",
+            file)
+//        MediaScannerConnection.scanFile(this, arrayOf(result),null){
+//            path, uri->
+            val shareIntent = Intent().apply {
+                action = Intent.ACTION_SEND
+                putExtra(Intent.EXTRA_STREAM, uri)
+                type = "image/png"
+                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+            }
             startActivity(Intent.createChooser(shareIntent,"Share"))
 
         }
     }
 
-}
+
 
 
