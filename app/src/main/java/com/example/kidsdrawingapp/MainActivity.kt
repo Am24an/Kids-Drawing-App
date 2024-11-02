@@ -36,38 +36,41 @@ class MainActivity : AppCompatActivity() {
 
     private var drawingView: DrawingView? = null
     private var mImageButtonCurrentPaint: ImageButton? = null
-    private var customProgressDialog : Dialog? = null
+    private var customProgressDialog: Dialog? = null
 
 
-     private val openGalleryLauncher: ActivityResultLauncher<Intent> =
-        registerForActivityResult(ActivityResultContracts.StartActivityForResult()){
-            result ->
-            if(result.resultCode == RESULT_OK && result.data!=null){
+    private val openGalleryLauncher: ActivityResultLauncher<Intent> =
+        registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+            if (result.resultCode == RESULT_OK && result.data != null) {
 
                 val imageBackGround: ImageView = findViewById(R.id.iv_background)
                 imageBackGround.setImageURI(result.data?.data)
             }
         }
 
-     private val requestPermission: ActivityResultLauncher<Array<String>> =
-        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()){
-            permissions ->
-            permissions.entries.forEach{
+    private val requestPermission: ActivityResultLauncher<Array<String>> =
+        registerForActivityResult(ActivityResultContracts.RequestMultiplePermissions()) { permissions ->
+            permissions.entries.forEach {
                 val permissionName = it.key
                 val isGranted = it.value
 
-                if(isGranted){
+                if (isGranted) {
                     Toast.makeText(
                         this@MainActivity,
-                        "Permission Granted", Toast.LENGTH_LONG).show()
+                        "Permission Granted", Toast.LENGTH_LONG
+                    ).show()
 
-                    val pickIntent = Intent(Intent.ACTION_PICK,
-                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
+                    val pickIntent = Intent(
+                        Intent.ACTION_PICK,
+                        MediaStore.Images.Media.EXTERNAL_CONTENT_URI
+                    );
                     openGalleryLauncher.launch(pickIntent)
-                }else{
-                    if(permissionName==Manifest.permission.READ_EXTERNAL_STORAGE){
-                        Toast.makeText(this@MainActivity,
-                            "Oops! You just denied the permission",Toast.LENGTH_LONG).show()
+                } else {
+                    if (permissionName == Manifest.permission.READ_EXTERNAL_STORAGE) {
+                        Toast.makeText(
+                            this@MainActivity,
+                            "Oops! You just denied the permission", Toast.LENGTH_LONG
+                        ).show()
                     }
 
                 }
@@ -101,9 +104,9 @@ class MainActivity : AppCompatActivity() {
 
         val ibSave: ImageButton = findViewById(R.id.ib_save)
         ibSave.setOnClickListener {
-            if(isReadStorageAllowed()){
+            if (isReadStorageAllowed()) {
                 showProgressDialog()
-                lifecycleScope.launch{
+                lifecycleScope.launch {
                     val flDrawingView: FrameLayout = findViewById(R.id.fl_drawing_view_container)
                     //val myBitmap : Bitmap = getBitmapFromView(flDrawingView)
                     saveBitmapFile(getBitmapFromView(flDrawingView))
@@ -113,8 +116,8 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
-        val ibGallery : ImageButton = findViewById(R.id.ib_gallery)
-        ibGallery.setOnClickListener{
+        val ibGallery: ImageButton = findViewById(R.id.ib_gallery)
+        ibGallery.setOnClickListener {
             requestStoragePermission()
         }
     }
@@ -150,35 +153,42 @@ class MainActivity : AppCompatActivity() {
             drawingView?.setColor(colorTag)
 
             imageButton.setImageDrawable(
-            ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
+                ContextCompat.getDrawable(this, R.drawable.pallet_pressed)
             )
 
             mImageButtonCurrentPaint?.setImageDrawable(
-            ContextCompat.getDrawable(this, R.drawable.pallet_normal)
+                ContextCompat.getDrawable(this, R.drawable.pallet_normal)
             )
             mImageButtonCurrentPaint = view
         }
     }
 
-    private fun isReadStorageAllowed(): Boolean{
-        val result = ContextCompat.checkSelfPermission(this,
-            Manifest.permission.READ_EXTERNAL_STORAGE)
+    private fun isReadStorageAllowed(): Boolean {
+        val result = ContextCompat.checkSelfPermission(
+            this,
+            Manifest.permission.READ_EXTERNAL_STORAGE
+        )
         return result == PackageManager.PERMISSION_GRANTED
     }
 
 
-    private fun requestStoragePermission()
-    {
-        if(ActivityCompat.shouldShowRequestPermissionRationale(
-            this,
-            Manifest.permission.READ_EXTERNAL_STORAGE)
-            ){
-                showRationaleDialog("Kids Drawing App",
-                    "Kids Drawing App" +" needs to access your External Storage.")
-            }else{
-                requestPermission.launch(arrayOf(
+    private fun requestStoragePermission() {
+        if (ActivityCompat.shouldShowRequestPermissionRationale(
+                this,
+                Manifest.permission.READ_EXTERNAL_STORAGE
+            )
+        ) {
+            showRationaleDialog(
+                "Kids Drawing App",
+                "Kids Drawing App" + " needs to access your External Storage."
+            )
+        } else {
+            requestPermission.launch(
+                arrayOf(
                     Manifest.permission.READ_EXTERNAL_STORAGE,
-                    Manifest.permission.WRITE_EXTERNAL_STORAGE))
+                    Manifest.permission.WRITE_EXTERNAL_STORAGE
+                )
+            )
         }
     }
 
@@ -196,33 +206,35 @@ class MainActivity : AppCompatActivity() {
     }
 
 
-    private fun showRationaleDialog(title: String, message: String){
+    private fun showRationaleDialog(title: String, message: String) {
 
         val builder: AlertDialog.Builder = AlertDialog.Builder(this)
         builder.setTitle(title)
             .setMessage(message)
-            .setPositiveButton("Cancel"){ dialog, _ ->
+            .setPositiveButton("Cancel") { dialog, _ ->
                 dialog.dismiss()
             }
         builder.create().show()
     }
 
 
-    private suspend fun saveBitmapFile(mBitmap: Bitmap?): String{
+    private suspend fun saveBitmapFile(mBitmap: Bitmap?): String {
         var result = ""
-        withContext(Dispatchers.IO){
-            if(mBitmap != null){
-                try{
+        withContext(Dispatchers.IO) {
+            if (mBitmap != null) {
+                try {
                     val bytes = ByteArrayOutputStream()
-                    mBitmap.compress(Bitmap.CompressFormat.PNG,90, bytes)
+                    mBitmap.compress(Bitmap.CompressFormat.PNG, 90, bytes)
 
 //                    val f = File(externalCacheDir?.absoluteFile.toString()
 //                    + File.separator + "KidsDrawingApp" + System.currentTimeMillis() / 1000 + ".png")
 
                     /*This is new updated code for saving the file and viewing it.*/
 
-                    val f = File(getExternalFilesDir(null)?.absolutePath.toString()
-                    + File.separator + "KidsDrawingApp" + System.currentTimeMillis() / 1000 + ".png")
+                    val f = File(
+                        getExternalFilesDir(null)?.absolutePath.toString()
+                                + File.separator + "KidsDrawingApp" + System.currentTimeMillis() / 1000 + ".png"
+                    )
 
                     val fo = FileOutputStream(f)
                     fo.write(bytes.toByteArray())
@@ -230,22 +242,24 @@ class MainActivity : AppCompatActivity() {
 
                     result = f.absolutePath
 
-                    runOnUiThread{
+                    runOnUiThread {
                         cancelProgressDialog()
-                        if (result.isNotEmpty()){
-                            Toast.makeText(this@MainActivity, "Files saved successfully: $result",
-                                Toast.LENGTH_SHORT).show()
+                        if (result.isNotEmpty()) {
+                            Toast.makeText(
+                                this@MainActivity, "Files saved successfully: $result",
+                                Toast.LENGTH_SHORT
+                            ).show()
                             shareImage(result)
                             notifyGallery(result) // Notify the media scanner.
-                        }else{
-                            Toast.makeText(this@MainActivity, "Something went wrong while saving the file.",
-                                Toast.LENGTH_SHORT).show()
+                        } else {
+                            Toast.makeText(
+                                this@MainActivity, "Something went wrong while saving the file.",
+                                Toast.LENGTH_SHORT
+                            ).show()
 
                         }
                     }
-                }
-
-                catch(e:Exception){
+                } catch (e: Exception) {
                     result = ""
                     e.printStackTrace()
                 }
@@ -257,12 +271,14 @@ class MainActivity : AppCompatActivity() {
 
     private fun notifyGallery(filePath: String) {
         MediaScannerConnection.scanFile(
-            this, arrayOf(filePath),null,){
-            path, uri ->
-            runOnUiThread{
+            this, arrayOf(filePath), null,
+        ) { path, uri ->
+            runOnUiThread {
 
-                Toast.makeText(this,"File is now visible in the gallery.",
-                    Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this, "File is now visible in the gallery.",
+                    Toast.LENGTH_SHORT
+                ).show()
             }
         }
     }
@@ -271,42 +287,44 @@ class MainActivity : AppCompatActivity() {
      * Method is used to show Custom Progress Dialog.
      */
 
-    private fun showProgressDialog(){
+    private fun showProgressDialog() {
         customProgressDialog = Dialog(this@MainActivity)
-    /* Set the screen content from a layout resource.
-    The resource will be inflated, adding all the top-level views to the screen.*/
-     customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
+        /* Set the screen content from a layout resource.
+        The resource will be inflated, adding all the top-level views to the screen.*/
+        customProgressDialog?.setContentView(R.layout.dialog_custom_progress)
 
 
-     //Start the dialog and display it on screen.
-    customProgressDialog?.show()
+        //Start the dialog and display it on screen.
+        customProgressDialog?.show()
     }
 
-    private fun cancelProgressDialog(){
-        if(customProgressDialog != null){
+    private fun cancelProgressDialog() {
+        if (customProgressDialog != null) {
             customProgressDialog?.dismiss()
             customProgressDialog = null
         }
 
     }
 
-    private fun shareImage(result: String){
+    private fun shareImage(result: String) {
         val file = File(result)
-        val uri = FileProvider.getUriForFile(this,
+        val uri = FileProvider.getUriForFile(
+            this,
             "com.example.kidsdrawingapp.fileprovider",
-            file)
+            file
+        )
 //        MediaScannerConnection.scanFile(this, arrayOf(result),null){
 //            path, uri->
-            val shareIntent = Intent().apply {
-                action = Intent.ACTION_SEND
-                putExtra(Intent.EXTRA_STREAM, uri)
-                type = "image/png"
-                addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
-            }
-            startActivity(Intent.createChooser(shareIntent,"Share"))
-
+        val shareIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_STREAM, uri)
+            type = "image/png"
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
+        startActivity(Intent.createChooser(shareIntent, "Share"))
+
     }
+}
 
 
 
